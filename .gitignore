@@ -102,11 +102,11 @@ captures/
 
 # Intellij
 *.iml
-.idea/workspace.xml
-.idea/tasks.xml
-.idea/gradle.xml
-.idea/dictionaries
-.idea/libraries
+**/.idea/workspace.xml
+**/.idea/tasks.xml
+**/.idea/gradle.xml
+**/.idea/dictionaries
+**/.idea/libraries
 
 # External native build folder generated in Android Studio 2.2 and later
 .externalNativeBuild
@@ -206,3 +206,4 @@ typings/
 # End of https://www.gitignore.io/api/reactnative
 
 config.json
+*.keystore

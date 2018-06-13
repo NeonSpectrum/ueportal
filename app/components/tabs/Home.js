@@ -5,7 +5,8 @@ import {
   View,
   AsyncStorage,
   ScrollView,
-  Image
+  Image,
+  NetInfo
 } from 'react-native'
 import PTRView from 'react-native-pull-to-refresh'
 import { url } from '../../../config'
@@ -32,27 +33,40 @@ export default class Home extends Component {
   _getData () {
     return new Promise(async (resolve, reject) => {
       this.setState({ loading: true })
-      fetch(url + '/info', {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: await AsyncStorage.getItem('credentials')
-      })
-        .then(res => res.json())
-        .then(res => {
-          if (this.state.mounted) {
-            this.setState({ data: res.data, loading: false })
-          }
-          resolve()
+      let isConnected = await NetInfo.isConnected.fetch()
+      if (!isConnected) {
+        let data = await AsyncStorage.getItem('info')
+        this.setState({
+          data: data ? JSON.parse(data) : null,
+          loading: false
         })
-        .catch(() => {
-          if (this.state.mounted) {
-            this.setState({ data: null, loading: false })
-          }
-          reject()
+      } else {
+        fetch(url + '/info', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: await AsyncStorage.getItem('id')
         })
+          .then(res => res.json())
+          .then(res => {
+            if (this.state.mounted) {
+              this.setState({ data: res.data, loading: false })
+              AsyncStorage.setItem('info', JSON.stringify(res.data))
+            }
+            resolve()
+          })
+          .catch(err => {
+            if (this.state.mounted) {
+              this.setState({
+                data: null,
+                loading: false
+              })
+            }
+            reject()
+          })
+      }
     })
   }
 

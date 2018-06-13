@@ -1,50 +1,42 @@
 const rp = require('request-promise')
+const cookie = require('cookie')
 const cheerio = require('cheerio')
+const { jars } = require('./auth')
 
 class Portal {
-  constructor (sn, pass) {
-    this.sn = sn
-    this.pass = pass
-    this.jar = rp.jar()
-  }
-
-  login () {
-    return new Promise(async (resolve, reject) => {
-      rp({
-        uri: 'https://www.ue.edu.ph/myportal/checkUser.php',
-        jar: this.jar,
-        method: 'POST',
-        form: {
-          SN: this.sn,
-          accesscode: this.pass,
-          portal: 'student'
-        },
-        json: true
-      })
-        .then(async json => {
-          if (json.message == 'error') reject()
-          else {
-            await rp({
-              uri: 'https://www.ue.edu.ph/myportal/index.php?ia=' + json.ia,
-              jar: this.jar
-            })
-            resolve()
-          }
-        })
-        .catch(err => reject())
-    })
+  constructor (id) {
+    this.id = id
   }
 
   getHTML (link) {
     return new Promise(async resolve => {
+      let jar = jars[this.id]
       resolve(
         await rp({
           uri: link,
-          jar: this.jar,
+          jar: jar,
           transform: body => cheerio.load(body)
         })
       )
     })
+  }
+
+  get isExists () {
+    if (jars[this.id]) {
+      return true
+    } else {
+      return false
+    }
+  }
+
+  destroy () {
+    if (jars[this.id]) {
+      console.log(Object.keys(jars))
+      delete jars[this.id]
+      console.log(Object.keys(jars))
+      return true
+    }
+    return false
   }
 }
 

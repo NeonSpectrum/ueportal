@@ -29,9 +29,10 @@ export default class Login extends Component {
   }
 
   async _loadInitialState () {
-    var value = await AsyncStorage.getItem('credentials')
+    var value = await AsyncStorage.getItem('id')
     if (value) {
-      this.props.navigation.navigate('Main')
+      var json = await (await fetch(url + '/id/' + JSON.parse(value).id)).json()
+      if (json.success) this.props.navigation.navigate('Main')
     }
     this.setState({ show: true })
   }
@@ -47,7 +48,7 @@ export default class Login extends Component {
       sn: this.state.sn,
       pass: this.state.pass
     })
-    fetch(url + '/login', {
+    fetch(url + '/', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -58,7 +59,7 @@ export default class Login extends Component {
       .then(res => res.json())
       .then(async res => {
         if (res.success) {
-          await AsyncStorage.setItem('credentials', credentials)
+          await AsyncStorage.setItem('id', JSON.stringify({ id: res.id }))
           this.clearFields()
           Alert.alert(
             'Login Successfully!',

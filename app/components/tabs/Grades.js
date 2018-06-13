@@ -5,7 +5,8 @@ import {
   View,
   AsyncStorage,
   ScrollView,
-  Image
+  Image,
+  NetInfo
 } from 'react-native'
 import {
   Table,
@@ -41,52 +42,68 @@ export default class Grades extends Component {
   _getData () {
     return new Promise(async (resolve, reject) => {
       this.setState({ loading: true })
-      fetch(url + '/grades', {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: await AsyncStorage.getItem('credentials')
-      })
-        .then(res => res.json())
-        .then(res => {
-          if (this.state.mounted) {
-            var head = Object.keys(res.data)
-            var body = []
-            for (var i = 0; i < head.length; i++) {
-              body.push(res.data[head[i]].map(x => Object.values(x)))
+      let isConnected = await NetInfo.isConnected.fetch()
+      if (!isConnected) {
+        let data = await AsyncStorage.getItem('grades')
+        this.setState({
+          data: data ? { table: this._getTable(JSON.parse(data)) } : null,
+          loading: false
+        })
+      } else {
+        fetch(url + '/grades', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: await AsyncStorage.getItem('id')
+        })
+          .then(res => res.json())
+          .then(res => {
+            if (this.state.mounted) {
+              this.setState({
+                data: { table: this._getTable(res.data) },
+                loading: false
+              })
+              AsyncStorage.setItem('grades', JSON.stringify(res.data))
             }
-            let table = head.map((headData, headIndex) => (
-              <TableWrapper key={headIndex}>
-                <Row
-                  key={headIndex}
-                  data={[headData]}
-                  textStyle={{ textAlign: 'center', padding: 10 }}
-                />
-                {body[headIndex].map((rowData, rowIndex) => (
-                  <Row
-                    key={rowIndex}
-                    data={rowData}
-                    textStyle={{ textAlign: 'center' }}
-                  />
-                ))}
-              </TableWrapper>
-            ))
-            this.setState({
-              data: { table },
-              loading: false
-            })
-          }
-          resolve()
-        })
-        .catch(() => {
-          if (this.state.mounted) {
-            this.setState({ data: null, loading: false })
-          }
-          reject()
-        })
+            resolve()
+          })
+          .catch(() => {
+            if (this.state.mounted) {
+              this.setState({
+                data: null,
+                loading: false
+              })
+            }
+            reject()
+          })
+      }
     })
+  }
+
+  _getTable (data) {
+    var head = Object.keys(data)
+    var body = []
+    for (var i = 0; i < head.length; i++) {
+      body.push(data[head[i]].map(x => Object.values(x)))
+    }
+    return head.map((headData, headIndex) => (
+      <TableWrapper key={headIndex}>
+        <Row
+          key={headIndex}
+          data={[headData]}
+          textStyle={{ textAlign: 'center', padding: 10 }}
+        />
+        {body[headIndex].map((rowData, rowIndex) => (
+          <Row
+            key={rowIndex}
+            data={rowData}
+            textStyle={{ textAlign: 'center' }}
+          />
+        ))}
+      </TableWrapper>
+    ))
   }
 
   render () {
@@ -113,18 +130,17 @@ export default class Grades extends Component {
       )
     } else {
       return (
-        <ScrollView>
-          <PTRView onRefresh={() => this._getData()}>
-            <View style={{ flex: 1 }} />
-          </PTRView>
-          <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
-            <Row
-              data={['Subject Code', 'Subject Name', 'Grade', 'Units']}
-              textStyle={{ textAlign: 'center' }}
-            />
-            {data.table}
-          </Table>
-        </ScrollView>
+        <PTRView onRefresh={() => this._getData()}>
+          <ScrollView>
+            <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
+              <Row
+                data={['Subject Code', 'Subject Name', 'Grade', 'Units']}
+                textStyle={{ textAlign: 'center' }}
+              />
+              {data.table}
+            </Table>
+          </ScrollView>
+        </PTRView>
       )
     }
   }

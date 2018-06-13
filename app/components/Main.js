@@ -6,6 +6,7 @@ import Login from './tabs/Home'
 import Home from './tabs/Home'
 import Grades from './tabs/Grades'
 import Schedules from './tabs/Schedules'
+import { url } from '../../config'
 
 const Tabs = createBottomTabNavigator(
   {
@@ -22,7 +23,9 @@ const Tabs = createBottomTabNavigator(
             {
               text: 'OK',
               onPress: async () => {
-                await AsyncStorage.removeItem('credentials')
+                let data = await AsyncStorage.getItem('id')
+                await fetch(url + '/destroy/' + JSON.parse(data).id)
+                await AsyncStorage.clear()
                 navigation.navigate('Login')
               }
             },
@@ -56,7 +59,7 @@ const Tabs = createBottomTabNavigator(
       activeTintColor: 'red',
       inactiveTintColor: 'gray'
     },
-    swipeEnabled: true
+    lazy: false
   }
 )
 

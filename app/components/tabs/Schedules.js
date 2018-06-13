@@ -5,7 +5,8 @@ import {
   View,
   AsyncStorage,
   ScrollView,
-  Image
+  Image,
+  NetInfo
 } from 'react-native'
 import {
   Table,
@@ -41,36 +42,53 @@ export default class Schedules extends Component {
   _getData () {
     return new Promise(async (resolve, reject) => {
       this.setState({ loading: true })
-      fetch(url + '/schedules', {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: await AsyncStorage.getItem('credentials')
-      })
-        .then(res => res.json())
-        .then(res => {
-          if (this.state.mounted) {
-            var body = []
-            for (var i = 0; i < res.data.length; i++) {
-              body.push(Object.values(res.data[i]))
+      let isConnected = await NetInfo.isConnected.fetch()
+      if (!isConnected) {
+        let data = await AsyncStorage.getItem('schedules')
+        this.setState({
+          data: data ? { table: this._getTable(JSON.parse(data)) } : null,
+          loading: false
+        })
+      } else {
+        fetch(url + '/schedules', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: await AsyncStorage.getItem('id')
+        })
+          .then(res => res.json())
+          .then(async res => {
+            if (this.state.mounted) {
+              this.setState({
+                data: { table: this._getTable(res.data) },
+                loading: false
+              })
+              AsyncStorage.setItem('schedules', JSON.stringify(res.data))
             }
-            let table = <Rows data={body} textStyle={{ textAlign: 'center' }} />
-            this.setState({
-              data: { table },
-              loading: false
-            })
-          }
-          resolve()
-        })
-        .catch(err => {
-          if (this.state.mounted) {
-            this.setState({ data: err, loading: false })
-          }
-          reject()
-        })
+            resolve()
+          })
+          .catch(err => {
+            alert(err)
+            if (this.state.mounted) {
+              this.setState({
+                data: null,
+                loading: false
+              })
+            }
+            reject()
+          })
+      }
     })
+  }
+
+  _getTable (data) {
+    var body = []
+    for (var i = 0; i < data.length; i++) {
+      body.push(Object.values(data[i]))
+    }
+    return <Rows data={body} textStyle={{ textAlign: 'center' }} />
   }
 
   render () {
@@ -97,26 +115,25 @@ export default class Schedules extends Component {
       )
     } else {
       return (
-        <ScrollView>
-          <PTRView onRefresh={() => this._getData()}>
-            <View style={styles.container} />
-          </PTRView>
-          <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
-            <Row
-              data={[
-                'Subject Code',
-                'Section',
-                'Units',
-                'Days',
-                'Time',
-                'Room',
-                'Faculty'
-              ]}
-              textStyle={{ textAlign: 'center' }}
-            />
-            {data.table}
-          </Table>
-        </ScrollView>
+        <PTRView onRefresh={() => this._getData()}>
+          <ScrollView>
+            <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
+              <Row
+                data={[
+                  'Subject Code',
+                  'Section',
+                  'Units',
+                  'Days',
+                  'Time',
+                  'Room',
+                  'Faculty'
+                ]}
+                textStyle={{ textAlign: 'center' }}
+              />
+              {data.table}
+            </Table>
+          </ScrollView>
+        </PTRView>
       )
     }
   }
