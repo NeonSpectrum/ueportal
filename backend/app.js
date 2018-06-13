@@ -22,6 +22,7 @@ app.use(
 
 app.post('/:data', (req, res) => {
   console.log(req.params.data)
+  console.log(req.body)
   var portal = new Portal(req.body.sn, req.body.pass)
   portal
     .login()

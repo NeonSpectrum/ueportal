@@ -11,6 +11,7 @@ import {
   Image,
   ToastAndroid
 } from 'react-native'
+import { url } from '../../config'
 
 export default class Login extends Component {
   constructor (props) {
@@ -46,7 +47,7 @@ export default class Login extends Component {
       sn: this.state.sn,
       pass: this.state.pass
     })
-    fetch('http://192.168.1.2:3000/login', {
+    fetch(url + '/login', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
