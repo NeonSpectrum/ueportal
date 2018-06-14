@@ -8,6 +8,7 @@ import {
   Image,
   NetInfo
 } from 'react-native'
+import Expo from 'expo'
 import PTRView from 'react-native-pull-to-refresh'
 import { url } from '../../../config'
 
@@ -51,7 +52,29 @@ export default class Home extends Component {
         })
           .then(res => res.json())
           .then(res => {
-            if (this.state.mounted) {
+            if (res.success === false) {
+              Alert.alert(
+                'Error!',
+                'Session has expired. Please login again.',
+                [
+                  {
+                    text: 'OK',
+                    onPress: () => {
+                      this.props.navigation.dispatch(
+                        StackActions.reset({
+                          index: 0,
+                          actions: [
+                            NavigationActions.navigate({
+                              routeName: 'Login'
+                            })
+                          ]
+                        })
+                      )
+                    }
+                  }
+                ]
+              )
+            } else if (this.state.mounted) {
               this.setState({ data: res.data, loading: false })
               AsyncStorage.setItem('info', JSON.stringify(res.data))
             }
@@ -123,7 +146,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 40
+    padding: 40,
+    marginTop: Expo.Constants.statusBarHeight
   },
   logo: {
     width: 200,

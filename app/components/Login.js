@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import {
+  Keyboard,
   StyleSheet,
   Text,
   View,
@@ -9,9 +10,10 @@ import {
   AsyncStorage,
   Alert,
   Image,
-  ToastAndroid
+  NetInfo
 } from 'react-native'
-import { NavigationActions } from 'react-navigation'
+import { NavigationActions, StackActions } from 'react-navigation'
+import Spinner from 'react-native-loading-spinner-overlay'
 import { url } from '../../config'
 
 export default class Login extends Component {
@@ -21,40 +23,77 @@ export default class Login extends Component {
       sn: '',
       pass: '',
       logging: false,
-      show: false
+      show: false,
+      createdBy: true
     }
+    this.keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      this._keyboardDidShow.bind(this)
+    )
+    this.keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      this._keyboardDidHide.bind(this)
+    )
   }
 
-  componentDidMount () {
-    this._loadInitialState().done()
-  }
-
-  async _loadInitialState () {
-    var value = await AsyncStorage.getItem('id')
+  async componentDidMount () {
+    var [value, isConnected] = await Promise.all([
+      AsyncStorage.getItem('id'),
+      NetInfo.isConnected.fetch()
+    ])
     if (value) {
-      var json = await (await fetch(url + '/id/' + JSON.parse(value).id)).json()
-      if (json.success) {
-        this.props.navigation.dispatch(
-          NavigationActions.reset({
-            index: 0,
-            actions: [
-              NavigationActions.navigate({
-                routeName: 'Main'
+      if (isConnected) {
+        fetch(url + '/id/' + JSON.parse(value).id)
+          .then(res => res.json())
+          .then(json => {
+            if (json.success) {
+              this.setState({ show: true }, () => {
+                this._goToMain()
               })
-            ]
+            }
           })
-        )
+      } else {
+        this.setState({ show: true }, () => {
+          this._goToMain()
+        })
       }
+    } else {
+      this.setState({ show: true })
     }
-    this.setState({ show: true })
   }
 
-  clearFields () {
+  componentWillUnmount () {
+    this.keyboardDidShowListener.remove()
+    this.keyboardDidHideListener.remove()
+  }
+
+  _keyboardDidShow () {
+    this.setState({ createdBy: false })
+  }
+
+  _keyboardDidHide () {
+    this.setState({ createdBy: true })
+  }
+
+  _clearFields () {
     this.snInput.clear()
     this.passInput.clear()
   }
 
-  login () {
+  _goToMain () {
+    this.props.navigation.dispatch(
+      StackActions.reset({
+        index: 0,
+        actions: [
+          NavigationActions.navigate({
+            routeName: 'Main'
+          })
+        ]
+      })
+    )
+  }
+
+  _login () {
     this.setState({ logging: true })
     let credentials = JSON.stringify({
       sn: this.state.sn,
@@ -72,30 +111,23 @@ export default class Login extends Component {
       .then(async res => {
         if (res.success) {
           await AsyncStorage.setItem('id', JSON.stringify({ id: res.id }))
-          this.clearFields()
-          Alert.alert(
-            'Login Successfully!',
-            'You will now redirect to student information.',
-            [
-              {
-                text: 'OK',
-                onPress: () => this.props.navigation.navigate('Main')
-              }
-            ]
-          )
+          this._clearFields()
+          this.setState({ logging: false }, () => {
+            this._goToMain()
+          })
         } else {
+          this.setState({ logging: false })
           Alert.alert(
             'Login failed!',
             'Invalid Student Number and/or Access Code'
           )
         }
-        this.setState({ logging: false })
       })
       .catch(err => {
         Alert.alert('Error!', "Couldn't connect to server.", [
           {
             text: 'Retry',
-            onPress: () => this.login()
+            onPress: () => this._login()
           },
           {
             text: 'Cancel',
@@ -109,6 +141,13 @@ export default class Login extends Component {
   render () {
     return this.state.show ? (
       <View style={styles.container}>
+        <Spinner
+          visible={this.state.logging}
+          overlayColor='rgb(217,30,24)'
+          textContent={'Logging in...'}
+          textStyle={{ color: '#FFF' }}
+          animation={'fade'}
+        />
         <Image source={require('../images/logo.png')} style={styles.logo} />
         <TextInput
           ref={input => {
@@ -131,17 +170,17 @@ export default class Login extends Component {
         />
         <TouchableOpacity
           style={styles.button}
-          onPress={() => this.login()}
+          onPress={() => this._login()}
           disabled={this.state.logging}
         >
-          <Text style={styles.buttonText}>
-            {this.state.logging ? 'Logging in...' : 'Login'}
-          </Text>
+          <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
         <View style={{ position: 'absolute', bottom: 5 }}>
-          <Text style={{ textAlign: 'center', color: '#fff' }}>
-            Created by NeonSpectrum
-          </Text>
+          {this.state.createdBy && (
+            <Text style={{ textAlign: 'center', color: '#fff' }}>
+              Created by NeonSpectrum
+            </Text>
+          )}
         </View>
       </View>
     ) : null

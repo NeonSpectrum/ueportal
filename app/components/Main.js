@@ -1,11 +1,16 @@
 import React, { Component } from 'react'
 import { Text, AsyncStorage, Alert } from 'react-native'
-import { createBottomTabNavigator, TabBarBottom } from 'react-navigation'
+import {
+  createBottomTabNavigator,
+  NavigationActions,
+  StackActions
+} from 'react-navigation'
 import Icon from 'react-native-vector-icons/Ionicons'
-import Login from './tabs/Home'
+import Spinner from 'react-native-loading-spinner-overlay'
 import Home from './tabs/Home'
 import Grades from './tabs/Grades'
 import Schedules from './tabs/Schedules'
+import Logout from './tabs/Logout'
 import { url } from '../../config'
 
 const Tabs = createBottomTabNavigator(
@@ -13,30 +18,7 @@ const Tabs = createBottomTabNavigator(
     Home: { screen: Home },
     Grades: { screen: Grades },
     Schedules: { screen: Schedules },
-    Logout: {
-      screen: () => {
-        return null
-      },
-      navigationOptions: ({ navigation }) => ({
-        tabBarOnPress: (scene, jumpToIndex) => {
-          Alert.alert('Logout', 'Are you sure do you want to logout?', [
-            {
-              text: 'OK',
-              onPress: async () => {
-                let data = await AsyncStorage.getItem('id')
-                await fetch(url + '/destroy/' + JSON.parse(data).id)
-                await AsyncStorage.clear()
-                navigation.navigate('Login')
-              }
-            },
-            {
-              text: 'Cancel',
-              style: 'cancel'
-            }
-          ])
-        }
-      })
-    }
+    Logout: { screen: Logout }
   },
   {
     navigationOptions: ({ navigation }) => ({

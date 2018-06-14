@@ -1,3 +1,8 @@
 {
-  "expoServerPort": null
+  "expoServerPort": 19000,
+  "packagerPort": 19001,
+  "packagerPid": 35056,
+  "expoServerNgrokUrl": "https://7p-zky.neonspectrum.ueportal.exp.direct",
+  "packagerNgrokUrl": "https://packager.7p-zky.neonspectrum.ueportal.exp.direct",
+  "ngrokPid": 35132
 }

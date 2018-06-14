@@ -1,4 +1,18 @@
 {
-  "name": "UEPortal",
-  "displayName": "UEPortal"
+  "expo": {
+    "name": "UE Portal",
+    "description": "UE Portal for mobile",
+    "sdkVersion": "27.0.0",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.neonspectrum.ueportal"
+    },
+    "icon": "app/images/icon.png",
+    "splash": {
+      "resizeMode": "cover",
+      "image": "app/images/splash.png"
+    }
+  }
 }

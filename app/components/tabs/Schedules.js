@@ -17,6 +17,7 @@ import {
   Cols,
   Cell
 } from 'react-native-table-component'
+import Expo from 'expo'
 import PTRView from 'react-native-pull-to-refresh'
 import { url } from '../../../config'
 
@@ -60,7 +61,29 @@ export default class Schedules extends Component {
         })
           .then(res => res.json())
           .then(async res => {
-            if (this.state.mounted) {
+            if (res.success === false) {
+              Alert.alert(
+                'Error!',
+                'Session has expired. Please login again.',
+                [
+                  {
+                    text: 'OK',
+                    onPress: () => {
+                      this.props.navigation.dispatch(
+                        StackActions.reset({
+                          index: 0,
+                          actions: [
+                            NavigationActions.navigate({
+                              routeName: 'Login'
+                            })
+                          ]
+                        })
+                      )
+                    }
+                  }
+                ]
+              )
+            } else if (this.state.mounted) {
               this.setState({
                 data: { table: this._getTable(res.data) },
                 loading: false
@@ -115,7 +138,11 @@ export default class Schedules extends Component {
     } else {
       return (
         <PTRView onRefresh={() => this._getData()}>
-          <ScrollView>
+          <ScrollView
+            contentContainerStyle={{
+              marginTop: Expo.Constants.statusBarHeight
+            }}
+          >
             <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
               <Row
                 data={[

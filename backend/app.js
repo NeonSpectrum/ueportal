@@ -39,7 +39,6 @@ app.get('/id/:id', async (req, res) => {
 })
 
 app.post('/:data', async (req, res) => {
-  console.log(req.params.data)
   var portal = new Portal(req.body.id)
   if (portal.isExists) {
     let data = null
@@ -67,7 +66,6 @@ app.post('/:data', async (req, res) => {
         )
       )
     }
-    console.log(data)
     res.send({ success: true, data })
   } else {
     res.send({ success: false, data: null })
