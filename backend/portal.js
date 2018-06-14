@@ -16,7 +16,7 @@ class Portal {
         jar: jar,
         transform: body => cheerio.load(body)
       })
-      if ($('body').text() == 'Invalid Session...') {
+      if ($('form[name=loginform]').length === 0) {
         await this.refresh()
         this.getHTML(link)
       } else {
