@@ -1,5 +1,5 @@
 const rp = require('request-promise')
-var jars = {}
+var credentials = {}
 
 class Auth {
   constructor (sn, pass) {
@@ -10,10 +10,11 @@ class Auth {
   login () {
     return new Promise(async (resolve, reject) => {
       let id = this._generateID()
-      jars[id] = rp.jar()
+      let jar = rp.jar()
+      let { sn, pass } = this
       rp({
         uri: 'https://www.ue.edu.ph/myportal/checkUser.php',
-        jar: jars[id],
+        jar: jar,
         method: 'POST',
         form: {
           SN: this.sn,
@@ -27,9 +28,10 @@ class Auth {
           else {
             await rp({
               uri: 'https://www.ue.edu.ph/myportal/index.php?ia=' + json.ia,
-              jar: jars[id]
+              jar: jar
             })
             this.generatedID = id
+            credentials[id] = { sn, pass, jar }
             resolve(true)
           }
         })
@@ -55,4 +57,4 @@ class Auth {
   }
 }
 
-module.exports = { Auth, jars }
+module.exports = { Auth, credentials }

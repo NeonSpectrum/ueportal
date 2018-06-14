@@ -1,7 +1,7 @@
 const rp = require('request-promise')
 const cookie = require('cookie')
 const cheerio = require('cheerio')
-const { jars } = require('./auth')
+const { credentials } = require('./auth')
 
 class Portal {
   constructor (id) {
@@ -10,14 +10,18 @@ class Portal {
 
   getHTML (link) {
     return new Promise(async resolve => {
-      let jar = jars[this.id]
-      resolve(
-        await rp({
-          uri: link,
-          jar: jar,
-          transform: body => cheerio.load(body)
-        })
-      )
+      let jar = credentials[this.id].jar
+      let $ = await rp({
+        uri: link,
+        jar: jar,
+        transform: body => cheerio.load(body)
+      })
+      if ($('body').text() == 'Invalid Session...') {
+        await this.refresh()
+        this.getHTML(link)
+      } else {
+        resolve($)
+      }
     })
   }
 
@@ -29,11 +33,37 @@ class Portal {
     }
   }
 
+  refresh () {
+    return new Promise(async (resolve, reject) => {
+      let { sn, pass, jar } = credentials[this.id]
+      rp({
+        uri: 'https://www.ue.edu.ph/myportal/checkUser.php',
+        jar: jar,
+        method: 'POST',
+        form: {
+          SN: sn,
+          accesscode: pass,
+          portal: 'student'
+        },
+        json: true
+      })
+        .then(async json => {
+          if (json.message == 'error') resolve(false)
+          else {
+            await rp({
+              uri: 'https://www.ue.edu.ph/myportal/index.php?ia=' + json.ia,
+              jar: jar
+            })
+            resolve(true)
+          }
+        })
+        .catch(err => resolve(false))
+    })
+  }
+
   destroy () {
     if (jars[this.id]) {
-      console.log(Object.keys(jars))
       delete jars[this.id]
-      console.log(Object.keys(jars))
       return true
     }
     return false

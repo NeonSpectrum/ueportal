@@ -20,4 +20,5 @@ const Application = createStackNavigator(
     }
   }
 )
+
 export default Application

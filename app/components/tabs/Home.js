@@ -87,7 +87,7 @@ export default class Home extends Component {
               style={styles.logo}
             />
             <Text style={{ fontSize: 36, textAlign: 'center' }}>
-              Cannot connect to server.
+              Couldn't connect to server.
             </Text>
           </View>
         </PTRView>

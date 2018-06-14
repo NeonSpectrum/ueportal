@@ -24,7 +24,7 @@ export default class Login extends Component {
     }
   }
 
-  componentWillMount () {
+  componentDidMount () {
     this._loadInitialState().done()
   }
 
@@ -126,6 +126,11 @@ export default class Login extends Component {
             {this.state.logging ? 'Logging in...' : 'Login'}
           </Text>
         </TouchableOpacity>
+        <View style={{ position: 'absolute', bottom: 5 }}>
+          <Text style={{ textAlign: 'center', color: '#fff' }}>
+            Created by NeonSpectrum
+          </Text>
+        </View>
       </View>
     ) : null
   }
@@ -143,7 +148,8 @@ const styles = StyleSheet.create({
   logo: {
     width: 200,
     height: 200,
-    marginBottom: 60
+    marginBottom: 60,
+    marginTop: -40
   },
   input: {
     alignSelf: 'stretch',

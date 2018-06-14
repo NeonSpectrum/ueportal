@@ -69,8 +69,7 @@ export default class Schedules extends Component {
             }
             resolve()
           })
-          .catch(err => {
-            alert(err)
+          .catch(() => {
             if (this.state.mounted) {
               this.setState({
                 data: null,
@@ -108,7 +107,7 @@ export default class Schedules extends Component {
               style={styles.logo}
             />
             <Text style={{ fontSize: 36, textAlign: 'center' }}>
-              Cannot connect to server.
+              Couldn't connect to server.
             </Text>
           </View>
         </PTRView>
