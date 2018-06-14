@@ -51,7 +51,7 @@ class Auth {
       for (var i = 0; i < 32; i++) {
         text += chars.charAt(Math.floor(Math.random() * chars.length))
       }
-    } while (jars[text])
+    } while (credentials[text])
 
     return text
   }
