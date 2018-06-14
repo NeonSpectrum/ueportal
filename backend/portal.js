@@ -26,7 +26,7 @@ class Portal {
   }
 
   get isExists () {
-    if (jars[this.id]) {
+    if (credentials[this.id]) {
       return true
     } else {
       return false
@@ -62,8 +62,8 @@ class Portal {
   }
 
   destroy () {
-    if (jars[this.id]) {
-      delete jars[this.id]
+    if (credentials[this.id]) {
+      delete credentials[this.id]
       return true
     }
     return false
