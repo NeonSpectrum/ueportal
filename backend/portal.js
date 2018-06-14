@@ -16,7 +16,7 @@ class Portal {
         jar: jar,
         transform: body => cheerio.load(body)
       })
-      if ($('form[name=loginform]').length === 0) {
+      if ($('form[name=loginform]').length !== 0) {
         await this.refresh()
         this.getHTML(link)
       } else {
@@ -26,11 +26,7 @@ class Portal {
   }
 
   get isExists () {
-    if (credentials[this.id]) {
-      return true
-    } else {
-      return false
-    }
+    return Boolean(credentials[this.id])
   }
 
   refresh () {

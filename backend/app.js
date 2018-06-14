@@ -70,7 +70,7 @@ app.post('/:data', async (req, res) => {
     console.log(data)
     res.send({ success: true, data })
   } else {
-    res.send({ success: false })
+    res.send({ success: false, data: null })
   }
 })
 

@@ -11,6 +11,7 @@ import {
   Image,
   ToastAndroid
 } from 'react-native'
+import { NavigationActions } from 'react-navigation'
 import { url } from '../../config'
 
 export default class Login extends Component {
@@ -32,7 +33,18 @@ export default class Login extends Component {
     var value = await AsyncStorage.getItem('id')
     if (value) {
       var json = await (await fetch(url + '/id/' + JSON.parse(value).id)).json()
-      if (json.success) this.props.navigation.navigate('Main')
+      if (json.success) {
+        this.props.navigation.dispatch(
+          NavigationActions.reset({
+            index: 0,
+            actions: [
+              NavigationActions.navigate({
+                routeName: 'Main'
+              })
+            ]
+          })
+        )
+      }
     }
     this.setState({ show: true })
   }
