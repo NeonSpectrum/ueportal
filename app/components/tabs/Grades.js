@@ -78,7 +78,7 @@ export default class Grades extends Component {
           key={headIndex}
           data={[headData]}
           textStyle={{ textAlign: 'center' }}
-          style={{ backgroundColor: '#F7F6E7', height: 40 }}
+          style={{ backgroundColor: '#F7F6E7', minHeight: 40 }}
         />
         {body[headIndex].map((rowData, rowIndex) => (
           <Row
@@ -142,7 +142,7 @@ export default class Grades extends Component {
                   color: '#fff',
                   fontWeight: 'bold'
                 }}
-                style={{ backgroundColor: '#7CEBEB', height: 40 }}
+                style={{ backgroundColor: '#7CEBEB', minHeight: 40 }}
               />
               {data.table}
             </Table>

@@ -130,7 +130,7 @@ export default class Schedules extends Component {
                   color: '#fff',
                   fontWeight: 'bold'
                 }}
-                style={{ backgroundColor: '#7CEBEB', height: 40 }}
+                style={{ backgroundColor: '#7CEBEB', minHeight: 40 }}
               />
               {data.table}
             </Table>

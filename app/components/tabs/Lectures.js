@@ -6,7 +6,8 @@ import {
   AsyncStorage,
   ScrollView,
   Image,
-  NetInfo
+  NetInfo,
+  Linking
 } from 'react-native'
 import {
   Table,
@@ -66,25 +67,86 @@ export default class Lectures extends Component {
   }
 
   _getTable (data) {
-    var body = []
-    for (var i = 0; i < data.length; i++) {
-      body.push(Object.values(data[i]))
-    }
-    return body.map((data, index) => (
+    let body = []
+    let header = Object.keys(data)[0]
+    data[header].forEach(x => {
+      body.push(Object.values(x))
+    })
+    let headerData = (
       <Row
-        key={index}
-        data={data}
-        flexArr={[1, 0.5, 0.5, 1.2, 1, 2]}
+        data={[header]}
         textStyle={{
           textAlign: 'center',
-          padding: 2
+          color: '#fff',
+          fontWeight: 'bold'
         }}
         style={{
-          backgroundColor: index % 2 ? '#f4f4f4' : '#fff',
+          backgroundColor: '#7CEBEB',
           minHeight: 40
         }}
       />
-    ))
+    )
+    let bodyData = body.map((headerContentData, index) => {
+      let x = (
+        <Row
+          key={index}
+          data={headerContentData.slice(0, headerContentData.length - 1)}
+          flexArr={[1, 0.5, 0.5, 1.2, 1, 2]}
+          textStyle={{
+            textAlign: 'center',
+            padding: 2
+          }}
+          style={{
+            backgroundColor: '#F7F6E7',
+            minHeight: 40
+          }}
+        />
+      )
+      let y = headerContentData[headerContentData.length - 1].map(
+        (tableData, tableIndex) => {
+          let { link } = tableData
+          tableData.link = (
+            <Text
+              style={{
+                color: 'blue',
+                textAlign: 'center',
+                padding: 2
+              }}
+              onPress={() => Linking.openURL(link)}
+            >
+              Download
+            </Text>
+          )
+          return (
+            <Row
+              key={tableIndex}
+              data={Object.values(tableData)}
+              flexArr={[1, 2, 1]}
+              textStyle={{
+                textAlign: 'center',
+                padding: 2
+              }}
+              style={{
+                backgroundColor: tableIndex % 2 ? '#f4f4f4' : '#fff',
+                minHeight: 40
+              }}
+            />
+          )
+        }
+      )
+      return (
+        <TableWrapper key={index}>
+          {x}
+          {y}
+        </TableWrapper>
+      )
+    })
+    return (
+      <TableWrapper>
+        {headerData}
+        {bodyData}
+      </TableWrapper>
+    )
   }
 
   render () {
@@ -121,19 +183,7 @@ export default class Lectures extends Component {
               marginTop: Expo.Constants.statusBarHeight
             }}
           >
-            <Table borderStyle={{ borderColor: '#C1C0B9' }}>
-              <Row
-                data={['CODE', 'SEC', 'DAY', 'TIME', 'ROOM', 'FACULTY']}
-                flexArr={[1, 0.5, 0.5, 1.2, 1, 2]}
-                textStyle={{
-                  textAlign: 'center',
-                  color: '#fff',
-                  fontWeight: 'bold'
-                }}
-                style={{ backgroundColor: '#7CEBEB', height: 40 }}
-              />
-              {data.table}
-            </Table>
+            <Table borderStyle={{ borderColor: '#C1C0B9' }}>{data.table}</Table>
           </ScrollView>
         </PTRView>
       )

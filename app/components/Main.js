@@ -30,9 +30,11 @@ const Tabs = createBottomTabNavigator(
         if (routeName === 'Home') {
           iconName = `ios-information-circle${focused ? '' : '-outline'}`
         } else if (routeName === 'Grades') {
-          iconName = `ios-create${focused ? '' : '-outline'}`
+          iconName = `ios-list-box${focused ? '' : '-outline'}`
         } else if (routeName === 'Schedules') {
           iconName = `ios-calendar${focused ? '' : '-outline'}`
+        } else if (routeName === 'Lectures') {
+          iconName = `ios-create${focused ? '' : '-outline'}`
         } else if (routeName === 'Logout') {
           iconName = `ios-exit${focused ? '' : '-outline'}`
         }

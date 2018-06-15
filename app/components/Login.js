@@ -75,7 +75,7 @@ export default class Login extends Component {
       pass: this.state.pass
     })
     try {
-      let res = await (await fetch(url + '/login', {
+      let res = await (await fetch(url + '/', {
         method: 'POST',
         headers: {
           Accept: 'application/json',
