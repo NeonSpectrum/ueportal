@@ -39,7 +39,7 @@ export default class Home extends Component {
       try {
         let res = await script.getData('info')
         if (res.success === false) {
-          script.sessionExpired()
+          script.sessionExpired(this.props.navigation)
         } else {
           this.setState({ data: res.data, loading: false })
           await AsyncStorage.setItem('info', JSON.stringify(res.data))

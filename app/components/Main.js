@@ -10,6 +10,7 @@ import Spinner from 'react-native-loading-spinner-overlay'
 import Home from './tabs/Home'
 import Grades from './tabs/Grades'
 import Schedules from './tabs/Schedules'
+import Lectures from './tabs/Lectures'
 import Logout from './tabs/Logout'
 import { url } from '../../config'
 
@@ -18,6 +19,7 @@ const Tabs = createBottomTabNavigator(
     Home: { screen: Home },
     Grades: { screen: Grades },
     Schedules: { screen: Schedules },
+    Lectures: { screen: Lectures },
     Logout: { screen: Logout }
   },
   {

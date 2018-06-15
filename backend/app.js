@@ -1,6 +1,5 @@
 const FormData = require('form-data')
 const express = require('express')
-const session = require('express-session')
 const app = express()
 const bodyParser = require('body-parser')
 const extractor = require('./extractor')
@@ -13,18 +12,11 @@ app.use(
     extended: true
   })
 )
-app.use(
-  session({
-    secret: 'ueportal',
-    resave: false,
-    saveUninitialized: false
-  })
-)
 
-app.post('/', async (req, res) => {
-  var auth = new Auth(req.body.sn, req.body.pass)
+app.get('/', async (req, res) => {
+  var auth = new Auth(req.query.sn, req.query.pass)
   var success = await auth.login()
-  console.log({ sn: req.body.sn, pass: req.body.pass, id: auth.id })
+  console.log({ sn: req.query.sn, pass: req.query.pass, id: auth.id })
   res.send({ success, id: auth.id })
 })
 
@@ -38,8 +30,8 @@ app.get('/id/:id', async (req, res) => {
   res.send({ success: portal.isExists })
 })
 
-app.post('/:data', async (req, res) => {
-  var portal = new Portal(req.body.id)
+app.get('/:data', async (req, res) => {
+  var portal = new Portal(req.query.id)
   if (portal.isExists) {
     let data = null
     if (req.params.data === 'info') {
@@ -65,8 +57,14 @@ app.post('/:data', async (req, res) => {
           'https://www.ue.edu.ph/studentsportal/?nav=schedule'
         )
       )
+    } else if (req.params.data === 'lectures') {
+      data = extractor.lectures(
+        await portal.getHTML(
+          'https://www.ue.edu.ph/studentsportal/?nav=elearning'
+        )
+      )
     }
-    res.send({ success: true, data })
+    res.send(JSON.stringify({ success: true, data }, null, 2))
   } else {
     res.send({ success: false, data: null })
   }

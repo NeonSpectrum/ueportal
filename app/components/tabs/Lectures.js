@@ -22,7 +22,7 @@ import PTRView from 'react-native-pull-to-refresh'
 import { url } from '../../../config'
 import script from '../../script'
 
-export default class Schedules extends Component {
+export default class Lectures extends Component {
   constructor (props) {
     super(props)
     this.state = {
@@ -39,14 +39,14 @@ export default class Schedules extends Component {
     this.setState({ loading: true })
     let isConnected = await NetInfo.isConnected.fetch()
     if (!isConnected) {
-      let data = await AsyncStorage.getItem('schedules')
+      let data = await AsyncStorage.getItem('lectures')
       this.setState({
         data: data ? { table: this._getTable(JSON.parse(data)) } : null,
         loading: false
       })
     } else {
       try {
-        let res = await script.getData('schedules')
+        let res = await script.getData('lectures')
         if (res.success === false) {
           script.sessionExpired(this.props.navigation)
         } else {
@@ -54,7 +54,7 @@ export default class Schedules extends Component {
             data: { table: this._getTable(res.data) },
             loading: false
           })
-          await AsyncStorage.setItem('schedules', JSON.stringify(res.data))
+          await AsyncStorage.setItem('lectures', JSON.stringify(res.data))
         }
       } catch (err) {
         this.setState({

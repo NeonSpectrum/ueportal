@@ -49,7 +49,7 @@ export default class Grades extends Component {
       try {
         let res = await script.getData('grades')
         if (res.success === false) {
-          script.sessionExpired()
+          script.sessionExpired(this.props.navigation)
         } else {
           this.setState({
             data: { table: this._getTable(res.data) },
@@ -77,15 +77,22 @@ export default class Grades extends Component {
         <Row
           key={headIndex}
           data={[headData]}
-          textStyle={{ textAlign: 'center', padding: 10 }}
-          style={{ backgroundColor: '#F7F6E7' }}
+          textStyle={{ textAlign: 'center' }}
+          style={{ backgroundColor: '#F7F6E7', height: 40 }}
         />
         {body[headIndex].map((rowData, rowIndex) => (
           <Row
             key={rowIndex}
             data={rowData}
-            textStyle={{ textAlign: 'center' }}
-            style={{ backgroundColor: rowIndex % 2 ? '#f4f4f4' : '#fff' }}
+            flexArr={[1, 2, 1, 1]}
+            textStyle={{
+              textAlign: 'center',
+              padding: 5
+            }}
+            style={{
+              backgroundColor: rowIndex % 2 ? '#f4f4f4' : '#fff',
+              minHeight: 40
+            }}
           />
         ))}
       </TableWrapper>
@@ -129,13 +136,13 @@ export default class Grades extends Component {
             <Table borderStyle={{ borderColor: '#C1C0B9' }}>
               <Row
                 data={['SUBJECT CODE', 'DESCRIPTION', 'GRADE', 'UNITS']}
+                flexArr={[1, 2, 1, 1]}
                 textStyle={{
                   textAlign: 'center',
-                  padding: 5,
                   color: '#fff',
                   fontWeight: 'bold'
                 }}
-                style={{ backgroundColor: '#7CEBEB' }}
+                style={{ backgroundColor: '#7CEBEB', height: 40 }}
               />
               {data.table}
             </Table>

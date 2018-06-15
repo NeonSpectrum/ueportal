@@ -1,7 +1,7 @@
 var extractor = {}
 
 extractor.info = x => {
-  var $ = x
+  let $ = x
   return {
     no: $('.subtable>tbody>tr')
       .eq(0)
@@ -37,10 +37,10 @@ extractor.info = x => {
 }
 
 extractor.grades = x => {
-  var $ = x
-  var data = {}
-  var current = null
-  var table = $('.enhancedtable')
+  let $ = x
+  let data = {}
+  let current = null
+  let table = $('.enhancedtable')
     .last()
     .find('tbody>tr')
   table.each(function (i) {
@@ -79,13 +79,13 @@ extractor.grades = x => {
 }
 
 extractor.schedules = x => {
-  var $ = x
-  var data = []
+  let $ = x
+  let data = []
 
-  var table = $('.enhancedtable>tbody>tr')
+  let table = $('.enhancedtable>tbody>tr')
   table.each(function (i) {
     if (i == table.length - 1) return
-    var td = $(this).find('td')
+    let td = $(this).find('td')
     data.push({
       subjectcode: td
         .eq(0)
@@ -119,4 +119,72 @@ extractor.schedules = x => {
   })
   return data
 }
+
+extractor.lectures = x => {
+  let $ = x
+  let header = $('.enhancedtable')
+    .find('thead>tr>th>strong')
+    .text()
+  let data = {
+    [header]: []
+  }
+  $('.enhancedtable>tbody>tr')
+    .filter(i => i % 2 == 0)
+    .each(function () {
+      let datatable = $(this)
+        .next()
+        .find('.dtltable')
+      let temp = {
+        code: $(this)
+          .find('td')
+          .eq(0)
+          .text(),
+        section: $(this)
+          .find('td')
+          .eq(1)
+          .text(),
+        days: $(this)
+          .find('td')
+          .eq(2)
+          .text(),
+        time: $(this)
+          .find('td')
+          .eq(3)
+          .text(),
+        room: $(this)
+          .find('td')
+          .eq(4)
+          .text(),
+        faculty: $(this)
+          .find('td')
+          .eq(5)
+          .text(),
+        lectures: []
+      }
+      datatable
+        .find('tr')
+        .slice(1)
+        .each(function () {
+          let lecture = {
+            name: $(this)
+              .find('td')
+              .eq(0)
+              .text(),
+            file: $(this)
+              .find('td')
+              .eq(1)
+              .text(),
+            link: `https://www.ue.edu.ph/studentsportal/${$(this)
+              .find('td')
+              .eq(2)
+              .find('a')
+              .attr('href')}`
+          }
+          temp.lectures.push(lecture)
+        })
+      data[header].push(temp)
+    })
+  return data
+}
+
 module.exports = extractor

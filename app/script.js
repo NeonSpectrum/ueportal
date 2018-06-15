@@ -5,14 +5,14 @@ import { url } from '../config'
 
 var script = {}
 
-script.sessionExpired = () => {
+script.sessionExpired = navigation => {
   return new Promise(async resolve => {
     await script.destroy()
     Alert.alert('Error!', 'Session has expired. Please login again.', [
       {
         text: 'OK',
         onPress: () => {
-          this.props.navigation.dispatch(
+          navigation.dispatch(
             StackActions.reset({
               index: 0,
               actions: [

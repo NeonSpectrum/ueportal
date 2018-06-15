@@ -31,6 +31,7 @@ class Auth {
               jar: jar
             })
             this.generatedID = id
+            // this.removeDuplicate(sn)
             credentials[id] = { sn, pass, jar }
             resolve(true)
           }
@@ -41,6 +42,13 @@ class Auth {
 
   get id () {
     return this.generatedID
+  }
+
+  removeDuplicate (sn) {
+    let ids = Object.keys(credentials).filter(x => credentials[x].sn === sn)
+    ids.forEach(id => {
+      delete x[id]
+    })
   }
 
   _generateID () {
