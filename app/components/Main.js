@@ -12,7 +12,6 @@ import Grades from './tabs/Grades'
 import Schedules from './tabs/Schedules'
 import Lectures from './tabs/Lectures'
 import Logout from './tabs/Logout'
-import { url } from '../../config'
 
 const Tabs = createBottomTabNavigator(
   {

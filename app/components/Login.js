@@ -13,7 +13,8 @@ import {
 } from 'react-native'
 import { NavigationActions, StackActions } from 'react-navigation'
 import Spinner from 'react-native-loading-spinner-overlay'
-import { url } from '../../config'
+import { backendURL } from '../../app'
+import script from '../script'
 
 export default class Login extends Component {
   constructor (props) {
@@ -34,9 +35,7 @@ export default class Login extends Component {
     if (value) {
       if (isConnected) {
         try {
-          let json = await (await fetch(
-            url + '/id/' + JSON.parse(value).id
-          )).json()
+          let json = await script.getData('id/' + JSON.parse(value).id)
           if (!json.success) return this.setState({ show: true })
         } catch (err) {
           // ignore no connection
@@ -75,7 +74,7 @@ export default class Login extends Component {
       pass: this.state.pass
     })
     try {
-      let res = await (await fetch(url + '/', {
+      let res = await (await fetch(backendURL + '/', {
         method: 'POST',
         headers: {
           Accept: 'application/json',

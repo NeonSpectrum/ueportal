@@ -39,10 +39,10 @@ script.destroy = () => {
   })
 }
 
-script.getData = category => {
+script.getData = params => {
   return new Promise(async (resolve, reject) => {
     try {
-      let res = await (await fetch(backendURL + '/' + category, {
+      let res = await (await fetch(backendURL + '/' + params, {
         method: 'POST',
         headers: {
           Accept: 'application/json',
