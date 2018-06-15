@@ -20,7 +20,6 @@ import {
   Cell
 } from 'react-native-table-component'
 import PTRView from 'react-native-pull-to-refresh'
-import { url } from '../../../config'
 import script from '../../script'
 
 export default class Grades extends Component {

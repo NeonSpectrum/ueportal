@@ -22,6 +22,7 @@
     ],
     "updates": {
       "fallbackToCacheTimeout": 5000
-    }
-  }
+    },
+  },
+  "backendURL": "http://neonspectrum:xyz:3000"
 }

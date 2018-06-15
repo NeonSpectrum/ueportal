@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { AsyncStorage, Alert } from 'react-native'
 import { NavigationActions, StackActions } from 'react-navigation'
-import { url } from '../config'
+import { backendURL } from '../app'
 
 var script = {}
 
@@ -34,7 +34,7 @@ script.destroy = () => {
       AsyncStorage.getItem('id'),
       AsyncStorage.clear()
     ])
-    if (data) await fetch(url + '/destroy/' + JSON.parse(data).id)
+    if (data) await fetch(backendURL + '/destroy/' + JSON.parse(data).id)
     resolve()
   })
 }
@@ -42,7 +42,7 @@ script.destroy = () => {
 script.getData = category => {
   return new Promise(async (resolve, reject) => {
     try {
-      let res = await (await fetch(url + '/' + category, {
+      let res = await (await fetch(backendURL + '/' + category, {
         method: 'POST',
         headers: {
           Accept: 'application/json',

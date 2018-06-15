@@ -10,7 +10,6 @@ import {
 } from 'react-native'
 import Expo from 'expo'
 import PTRView from 'react-native-pull-to-refresh'
-import { url } from '../../../config'
 import script from '../../script'
 
 export default class Home extends Component {

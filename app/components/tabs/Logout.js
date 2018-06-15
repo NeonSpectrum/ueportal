@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { AsyncStorage, Alert } from 'react-native'
 import { StackActions, NavigationActions } from 'react-navigation'
 import Spinner from 'react-native-loading-spinner-overlay'
-import { url } from '../../../config'
 import script from '../../script'
 
 export default class Logout extends Component {
