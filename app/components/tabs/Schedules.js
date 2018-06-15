@@ -20,89 +20,49 @@ import {
 import Expo from 'expo'
 import PTRView from 'react-native-pull-to-refresh'
 import { url } from '../../../config'
+import script from '../../script'
 
 export default class Schedules extends Component {
   constructor (props) {
     super(props)
     this.state = {
       loading: true,
-      mounted: true,
       data: null
     }
   }
 
   async componentDidMount () {
-    this.setState({ mounted: true })
     this._getData()
   }
 
-  componentWillUnmount () {
-    this.setState({ mounted: false })
-  }
-
-  _getData () {
-    return new Promise(async (resolve, reject) => {
-      this.setState({ loading: true })
-      let isConnected = await NetInfo.isConnected.fetch()
-      if (!isConnected) {
-        let data = await AsyncStorage.getItem('schedules')
+  async _getData () {
+    this.setState({ loading: true })
+    let isConnected = await NetInfo.isConnected.fetch()
+    if (!isConnected) {
+      let data = await AsyncStorage.getItem('schedules')
+      this.setState({
+        data: data ? { table: this._getTable(JSON.parse(data)) } : null,
+        loading: false
+      })
+    } else {
+      try {
+        let res = await script.getData('schedules')
+        if (res.success === false) {
+          script.sessionExpired()
+        } else {
+          this.setState({
+            data: { table: this._getTable(res.data) },
+            loading: false
+          })
+          await AsyncStorage.setItem('schedules', JSON.stringify(res.data))
+        }
+      } catch (err) {
         this.setState({
-          data: data ? { table: this._getTable(JSON.parse(data)) } : null,
+          data: null,
           loading: false
         })
-      } else {
-        fetch(url + '/schedules', {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: await AsyncStorage.getItem('id')
-        })
-          .then(res => res.json())
-          .then(async res => {
-            if (res.success === false) {
-              Alert.alert(
-                'Error!',
-                'Session has expired. Please login again.',
-                [
-                  {
-                    text: 'OK',
-                    onPress: () => {
-                      this.props.navigation.dispatch(
-                        StackActions.reset({
-                          index: 0,
-                          actions: [
-                            NavigationActions.navigate({
-                              routeName: 'Login'
-                            })
-                          ]
-                        })
-                      )
-                    }
-                  }
-                ]
-              )
-            } else if (this.state.mounted) {
-              this.setState({
-                data: { table: this._getTable(res.data) },
-                loading: false
-              })
-              AsyncStorage.setItem('schedules', JSON.stringify(res.data))
-            }
-            resolve()
-          })
-          .catch(() => {
-            if (this.state.mounted) {
-              this.setState({
-                data: null,
-                loading: false
-              })
-            }
-            reject()
-          })
       }
-    })
+    }
   }
 
   _getTable (data) {
@@ -117,22 +77,26 @@ export default class Schedules extends Component {
     const { data, loading } = this.state
     if (loading) {
       return (
-        <View style={styles.container}>
+        <PTRView
+          onRefresh={() => this._getData()}
+          contentContainerStyle={styles.container}
+        >
           <Image source={require('../../images/loading.gif')} />
-        </View>
+        </PTRView>
       )
     } else if (!data) {
       return (
-        <PTRView onRefresh={() => this._getData()}>
-          <View style={styles.container}>
-            <Image
-              source={require('../../images/error.png')}
-              style={styles.logo}
-            />
-            <Text style={{ fontSize: 36, textAlign: 'center' }}>
-              Couldn't connect to server.
-            </Text>
-          </View>
+        <PTRView
+          onRefresh={() => this._getData()}
+          contentContainerStyle={styles.container}
+        >
+          <Image
+            source={require('../../images/error.png')}
+            style={styles.logo}
+          />
+          <Text style={{ fontSize: 36, textAlign: 'center' }}>
+            Couldn't connect to server.
+          </Text>
         </PTRView>
       )
     } else {
@@ -143,18 +107,23 @@ export default class Schedules extends Component {
               marginTop: Expo.Constants.statusBarHeight
             }}
           >
-            <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
+            <Table borderStyle={{ borderColor: '#C1C0B9' }}>
               <Row
                 data={[
-                  'Subject Code',
-                  'Section',
-                  'Units',
-                  'Days',
-                  'Time',
-                  'Room',
-                  'Faculty'
+                  'SUBJECT CODE',
+                  'SECTION',
+                  'DAYS',
+                  'TIME',
+                  'ROOM',
+                  'FACULTY'
                 ]}
-                textStyle={{ textAlign: 'center' }}
+                textStyle={{
+                  textAlign: 'center',
+                  padding: 5,
+                  color: '#fff',
+                  fontWeight: 'bold'
+                }}
+                style={{ backgroundColor: '#7CEBEB' }}
               />
               {data.table}
             </Table>
@@ -170,7 +139,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 40
+    padding: 40,
+    marginTop: Expo.Constants.statusBarHeight
   },
   logo: {
     width: 200,

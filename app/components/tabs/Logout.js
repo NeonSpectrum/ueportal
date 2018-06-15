@@ -3,6 +3,7 @@ import { AsyncStorage, Alert } from 'react-native'
 import { StackActions, NavigationActions } from 'react-navigation'
 import Spinner from 'react-native-loading-spinner-overlay'
 import { url } from '../../../config'
+import script from '../../script'
 
 export default class Logout extends Component {
   constructor (props) {
@@ -31,11 +32,7 @@ export default class Logout extends Component {
           text: 'OK',
           onPress: async () => {
             params.loading(true)
-            let [data] = await Promise.all([
-              AsyncStorage.getItem('id'),
-              AsyncStorage.clear()
-            ])
-            if (data) await fetch(url + '/destroy/' + JSON.parse(data).id)
+            await script.destroy()
             params.loading(false)
             navigation.dispatch(
               StackActions.reset({

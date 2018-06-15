@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import {
-  Keyboard,
   StyleSheet,
   Text,
   View,
@@ -23,17 +22,8 @@ export default class Login extends Component {
       sn: '',
       pass: '',
       logging: false,
-      show: false,
-      createdBy: true
+      show: false
     }
-    this.keyboardDidShowListener = Keyboard.addListener(
-      'keyboardDidShow',
-      this._keyboardDidShow.bind(this)
-    )
-    this.keyboardDidHideListener = Keyboard.addListener(
-      'keyboardDidHide',
-      this._keyboardDidHide.bind(this)
-    )
   }
 
   async componentDidMount () {
@@ -43,36 +33,21 @@ export default class Login extends Component {
     ])
     if (value) {
       if (isConnected) {
-        fetch(url + '/id/' + JSON.parse(value).id)
-          .then(res => res.json())
-          .then(json => {
-            if (json.success) {
-              this.setState({ show: true }, () => {
-                this._goToMain()
-              })
-            }
-          })
-      } else {
-        this.setState({ show: true }, () => {
-          this._goToMain()
-        })
+        try {
+          let json = await (await fetch(
+            url + '/id/' + JSON.parse(value).id
+          )).json()
+          if (!json.success) return this.setState({ show: true })
+        } catch (err) {
+          // ignore no connection
+        }
       }
+      this.setState({ show: true }, () => {
+        this._goToMain()
+      })
     } else {
       this.setState({ show: true })
     }
-  }
-
-  componentWillUnmount () {
-    this.keyboardDidShowListener.remove()
-    this.keyboardDidHideListener.remove()
-  }
-
-  _keyboardDidShow () {
-    this.setState({ createdBy: false })
-  }
-
-  _keyboardDidHide () {
-    this.setState({ createdBy: true })
   }
 
   _clearFields () {
@@ -93,49 +68,47 @@ export default class Login extends Component {
     )
   }
 
-  _login () {
+  async _login () {
     this.setState({ logging: true })
     let credentials = JSON.stringify({
       sn: this.state.sn,
       pass: this.state.pass
     })
-    fetch(url + '/', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: credentials
-    })
-      .then(res => res.json())
-      .then(async res => {
-        if (res.success) {
-          await AsyncStorage.setItem('id', JSON.stringify({ id: res.id }))
-          this._clearFields()
-          this.setState({ logging: false }, () => {
-            this._goToMain()
-          })
-        } else {
-          this.setState({ logging: false })
-          Alert.alert(
-            'Login failed!',
-            'Invalid Student Number and/or Access Code'
-          )
-        }
-      })
-      .catch(err => {
-        Alert.alert('Error!', "Couldn't connect to server.", [
-          {
-            text: 'Retry',
-            onPress: () => this._login()
-          },
-          {
-            text: 'Cancel',
-            style: 'cancel'
-          }
-        ])
+    try {
+      let res = await (await fetch(url + '/', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: credentials
+      })).json()
+      if (res.success) {
+        await AsyncStorage.setItem('id', JSON.stringify({ id: res.id }))
+        this._clearFields()
+        this.setState({ logging: false }, () => {
+          this._goToMain()
+        })
+      } else {
         this.setState({ logging: false })
-      })
+        Alert.alert(
+          'Login failed!',
+          'Invalid Student Number and/or Access Code'
+        )
+      }
+    } catch (err) {
+      Alert.alert('Error!', "Couldn't connect to server.", [
+        {
+          text: 'Retry',
+          onPress: () => this._login()
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel'
+        }
+      ])
+      this.setState({ logging: false })
+    }
   }
 
   render () {
@@ -157,6 +130,7 @@ export default class Login extends Component {
           placeholder='Student Number'
           onChangeText={sn => this.setState({ sn })}
           underlineColorAndroid='transparent'
+          onSubmitEditing={() => this._login()}
         />
         <TextInput
           ref={input => {
@@ -166,6 +140,7 @@ export default class Login extends Component {
           placeholder='Access Code'
           onChangeText={pass => this.setState({ pass })}
           underlineColorAndroid='transparent'
+          onSubmitEditing={() => this._login()}
           secureTextEntry
         />
         <TouchableOpacity
@@ -175,15 +150,16 @@ export default class Login extends Component {
         >
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
-        <View style={{ position: 'absolute', bottom: 5 }}>
-          {this.state.createdBy && (
-            <Text style={{ textAlign: 'center', color: '#fff' }}>
-              Created by NeonSpectrum
-            </Text>
-          )}
-        </View>
       </View>
-    ) : null
+    ) : (
+      <Spinner
+        visible={true}
+        overlayColor='rgb(217,30,24)'
+        textContent={'Loading...'}
+        textStyle={{ color: '#FFF' }}
+        animation={'fade'}
+      />
+    )
   }
 }
 

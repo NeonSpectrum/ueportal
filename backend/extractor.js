@@ -95,10 +95,10 @@ extractor.schedules = x => {
         .eq(1)
         .text()
         .trim(),
-      units: td
-        .eq(2)
-        .text()
-        .trim(),
+      // units: td
+      //   .eq(2)
+      //   .text()
+      //   .trim(),
       days: td
         .eq(3)
         .text()

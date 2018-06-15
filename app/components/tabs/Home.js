@@ -11,129 +11,91 @@ import {
 import Expo from 'expo'
 import PTRView from 'react-native-pull-to-refresh'
 import { url } from '../../../config'
+import script from '../../script'
 
 export default class Home extends Component {
   constructor (props) {
     super(props)
     this.state = {
       loading: true,
-      mounted: true,
       data: null
     }
   }
 
   async componentDidMount () {
-    this.setState({ mounted: true })
     this._getData()
   }
 
-  componentWillUnmount () {
-    this.setState({ mounted: false })
-  }
-
-  _getData () {
-    return new Promise(async (resolve, reject) => {
-      this.setState({ loading: true })
-      let isConnected = await NetInfo.isConnected.fetch()
-      if (!isConnected) {
-        let data = await AsyncStorage.getItem('info')
+  async _getData () {
+    this.setState({ loading: true })
+    let isConnected = await NetInfo.isConnected.fetch()
+    if (!isConnected) {
+      let data = await AsyncStorage.getItem('info')
+      this.setState({
+        data: data ? JSON.parse(data) : null,
+        loading: false
+      })
+    } else {
+      try {
+        let res = await script.getData('info')
+        if (res.success === false) {
+          script.sessionExpired()
+        } else {
+          this.setState({ data: res.data, loading: false })
+          await AsyncStorage.setItem('info', JSON.stringify(res.data))
+        }
+      } catch (err) {
         this.setState({
-          data: data ? JSON.parse(data) : null,
+          data: null,
           loading: false
         })
-      } else {
-        fetch(url + '/info', {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: await AsyncStorage.getItem('id')
-        })
-          .then(res => res.json())
-          .then(res => {
-            if (res.success === false) {
-              Alert.alert(
-                'Error!',
-                'Session has expired. Please login again.',
-                [
-                  {
-                    text: 'OK',
-                    onPress: () => {
-                      this.props.navigation.dispatch(
-                        StackActions.reset({
-                          index: 0,
-                          actions: [
-                            NavigationActions.navigate({
-                              routeName: 'Login'
-                            })
-                          ]
-                        })
-                      )
-                    }
-                  }
-                ]
-              )
-            } else if (this.state.mounted) {
-              this.setState({ data: res.data, loading: false })
-              AsyncStorage.setItem('info', JSON.stringify(res.data))
-            }
-            resolve()
-          })
-          .catch(err => {
-            if (this.state.mounted) {
-              this.setState({
-                data: null,
-                loading: false
-              })
-            }
-            reject()
-          })
       }
-    })
+    }
   }
 
   render () {
     const { data, loading } = this.state
     if (loading) {
       return (
-        <View style={styles.container}>
+        <PTRView
+          onRefresh={() => this._getData()}
+          contentContainerStyle={styles.container}
+        >
           <Image source={require('../../images/loading.gif')} />
-        </View>
+        </PTRView>
       )
     } else if (!data) {
       return (
-        <PTRView onRefresh={() => this._getData()}>
-          <View style={styles.container}>
-            <Image
-              source={require('../../images/error.png')}
-              style={styles.logo}
-            />
-            <Text style={{ fontSize: 36, textAlign: 'center' }}>
-              Couldn't connect to server.
-            </Text>
-          </View>
+        <PTRView
+          onRefresh={() => this._getData()}
+          contentContainerStyle={styles.container}
+        >
+          <Image
+            source={require('../../images/error.png')}
+            style={styles.logo}
+          />
+          <Text style={{ fontSize: 36, textAlign: 'center' }}>
+            Couldn't connect to server.
+          </Text>
         </PTRView>
       )
     } else {
+      let { url, logo, no, name, course, yearLevel, college, campus } = data
       return (
         <ScrollView>
-          <PTRView onRefresh={() => this._getData()}>
-            <View style={styles.container}>
-              <Image source={{ uri: data.url }} style={styles.logo} />
-              <Text style={styles.no}>{data.no}</Text>
-              <Text style={styles.info}>
-                <Text style={styles.bold}>Name</Text>:{` ${data.name}\n\n`}
-                <Text style={styles.bold}>Course</Text>:{` ${data.course}\n\n`}
-                <Text style={styles.bold}>Year Level</Text>:{` ${
-                  data.yearLevel
-                }\n\n`}
-                <Text style={styles.bold}>College</Text>:{` ${
-                  data.college
-                }\n\n`}
-                <Text style={styles.bold}>Campus</Text>:{` ${data.campus}`}
-              </Text>
-            </View>
+          <PTRView
+            onRefresh={() => this._getData()}
+            contentContainerStyle={styles.container}
+          >
+            <Image source={{ uri: url }} style={styles.logo} />
+            <Text style={styles.no}>{no}</Text>
+            <Text style={styles.info}>
+              <Text style={styles.bold}>Name</Text>:{` ${name}\n\n`}
+              <Text style={styles.bold}>Course</Text>:{` ${course}\n\n`}
+              <Text style={styles.bold}>Year Level</Text>:{` ${yearLevel}\n\n`}
+              <Text style={styles.bold}>College</Text>:{` ${college}\n\n`}
+              <Text style={styles.bold}>Campus</Text>:{` ${campus}`}
+            </Text>
           </PTRView>
         </ScrollView>
       )
