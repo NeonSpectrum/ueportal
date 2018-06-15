@@ -125,6 +125,7 @@ extractor.lectures = x => {
   let header = $('.enhancedtable')
     .find('thead>tr>th>strong')
     .text()
+    .toUpperCase()
   let data = {
     [header]: []
   }

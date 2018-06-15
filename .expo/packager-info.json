@@ -1,8 +1,8 @@
 {
-  "expoServerPort": 19000,
-  "packagerPort": 19001,
-  "packagerPid": 27484,
-  "expoServerNgrokUrl": "https://t8-rvd.neonspectrum.ueportal.exp.direct",
-  "packagerNgrokUrl": "https://packager.t8-rvd.neonspectrum.ueportal.exp.direct",
-  "ngrokPid": 18056
+  "expoServerPort": null,
+  "packagerPort": null,
+  "packagerPid": null,
+  "expoServerNgrokUrl": null,
+  "packagerNgrokUrl": null,
+  "ngrokPid": null
 }
