@@ -13,10 +13,10 @@ app.use(
   })
 )
 
-app.get('/', async (req, res) => {
-  var auth = new Auth(req.query.sn, req.query.pass)
+app.post('/', async (req, res) => {
+  var auth = new Auth(req.body.sn, req.body.pass)
   var success = await auth.login()
-  console.log({ sn: req.query.sn, pass: req.query.pass, id: auth.id })
+  console.log({ sn: req.body.sn, pass: req.body.pass, id: auth.id })
   res.send({ success, id: auth.id })
 })
 
@@ -30,8 +30,8 @@ app.get('/id/:id', async (req, res) => {
   res.send({ success: portal.isExists })
 })
 
-app.get('/:data', async (req, res) => {
-  var portal = new Portal(req.query.id)
+app.post('/:data', async (req, res) => {
+  var portal = new Portal(req.body.id)
   if (portal.isExists) {
     let data = null
     if (req.params.data === 'info') {

@@ -75,7 +75,7 @@ export default class Login extends Component {
       pass: this.state.pass
     })
     try {
-      let res = await (await fetch(url + '/', {
+      let res = await (await fetch(url + '/login', {
         method: 'POST',
         headers: {
           Accept: 'application/json',
@@ -97,7 +97,7 @@ export default class Login extends Component {
         )
       }
     } catch (err) {
-      Alert.alert('Error!', "Couldn't connect to server.", [
+      Alert.alert('Error!', "Couldn't connect to server." + err, [
         {
           text: 'Retry',
           onPress: () => this._login()
