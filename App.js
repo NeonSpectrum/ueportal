@@ -11,8 +11,6 @@ YellowBox.ignoreWarnings([
   'Module RCTImageLoader'
 ])
 
-Sentry.enableInExpoDevelopment = true
-
 Sentry.config(
   'https://e04b9eada20d4f5187c663b035eec8a2@sentry.io/1228125'
 ).install()

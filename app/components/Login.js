@@ -35,9 +35,9 @@ export default class Login extends Component {
       AsyncStorage.getItem('id'),
       NetInfo.isConnected.fetch()
     ])
-    if (data) {
-      if (isConnected) {
-        this._checkForUpdates()
+    if (isConnected) {
+      this._checkForUpdates()
+      if (data) {
         try {
           let json = await script.getData('id/' + data)
           if (!json.success) return this.setState({ show: true })
@@ -45,12 +45,10 @@ export default class Login extends Component {
           // ignore no connection
         }
       }
-      this.setState({ show: true }, () => {
-        this._goToMain()
-      })
-    } else {
-      this.setState({ show: true })
     }
+    this.setState({ show: true }, () => {
+      if (data) this._goToMain()
+    })
   }
 
   _clearFields () {
@@ -71,10 +69,10 @@ export default class Login extends Component {
     )
   }
 
-  _checkForUpdates () {
+  async _checkForUpdates () {
     Expo.Updates.checkForUpdateAsync()
-      .then(isAvailable => {
-        if (isAvailable) {
+      .then(update => {
+        if (update.isAvailable) {
           Alert.alert('New Update', 'An update is available. Download now?', [
             {
               text: 'Download',
@@ -85,8 +83,9 @@ export default class Login extends Component {
                       event.type === Expo.Updates.EventType.DOWNLOAD_STARTED
                     ) {
                       MessageBarManager.showAlert({
-                        title: 'Downloading...',
-                        shouldHideAfterDelay: false
+                        message: 'Downloading...',
+                        shouldHideAfterDelay: false,
+                        viewTopOffset: Expo.Constants.statusBarHeight
                       })
                     } else if (
                       event.type === Expo.Updates.EventType.DOWNLOAD_FINISHED
@@ -222,6 +221,7 @@ export default class Login extends Component {
             textAlign: 'center',
             color: '#fff'
           }}
+          onPress={() => this._checkForUpdates()}
         >
           {channel} Build v{expo.version}
         </Text>

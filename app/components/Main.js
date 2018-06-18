@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Text, AsyncStorage, Alert } from 'react-native'
+import { Text, AsyncStorage } from 'react-native'
 import {
   createBottomTabNavigator,
   NavigationActions,
