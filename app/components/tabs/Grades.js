@@ -37,9 +37,11 @@ export default class Grades extends Component {
 
   async _getData () {
     this.setState({ loading: true })
-    let isConnected = await NetInfo.isConnected.fetch()
+    let [data, isConnected] = await Promise.all([
+      AsyncStorage.getItem('grades'),
+      NetInfo.isConnected.fetch()
+    ])
     if (!isConnected) {
-      let data = await AsyncStorage.getItem('grades')
       this.setState({
         data: data ? { table: this._getTable(JSON.parse(data)) } : null,
         loading: false
@@ -58,7 +60,7 @@ export default class Grades extends Component {
         }
       } catch (err) {
         this.setState({
-          data: null,
+          data: data ? { table: this._getTable(JSON.parse(data)) } : null,
           loading: false
         })
       }

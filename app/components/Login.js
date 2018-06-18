@@ -14,6 +14,7 @@ import {
 } from 'react-native'
 import { NavigationActions, StackActions } from 'react-navigation'
 import { MessageBarManager } from 'react-native-message-bar'
+import fetch from 'react-native-fetch-polyfill'
 import Spinner from 'react-native-loading-spinner-overlay'
 import { backendURL, expo } from '../../app'
 import script from '../script'
@@ -84,7 +85,7 @@ export default class Login extends Component {
                       event.type === Expo.Updates.EventType.DOWNLOAD_STARTED
                     ) {
                       MessageBarManager.showAlert({
-                        message: 'Downloading...',
+                        title: 'Downloading...',
                         shouldHideAfterDelay: false
                       })
                     } else if (
@@ -126,7 +127,6 @@ export default class Login extends Component {
     let { sn, pass } = this.state
     if (!sn || !pass) return Alert.alert('Error!', 'Please fill up all fields.')
     this.setState({ logging: true })
-    let credentials = JSON.stringify({ sn, pass })
     try {
       let res = await (await fetch(backendURL + '/', {
         method: 'POST',
@@ -134,11 +134,11 @@ export default class Login extends Component {
           Accept: 'application/json',
           'Content-Type': 'application/json'
         },
-        body: credentials
+        timeout: 10000,
+        body: JSON.stringify({ sn, pass })
       })).json()
       if (res.success) {
         await AsyncStorage.setItem('id', res.id)
-        this._clearFields()
         this.setState({ logging: false }, () => {
           this._goToMain()
         })

@@ -27,9 +27,11 @@ export default class Home extends Component {
 
   async _getData () {
     this.setState({ loading: true })
-    let isConnected = await NetInfo.isConnected.fetch()
+    let [data, isConnected] = await Promise.all([
+      AsyncStorage.getItem('info'),
+      NetInfo.isConnected.fetch()
+    ])
     if (!isConnected) {
-      let data = await AsyncStorage.getItem('info')
       this.setState({
         data: data ? JSON.parse(data) : null,
         loading: false
@@ -45,7 +47,7 @@ export default class Home extends Component {
         }
       } catch (err) {
         this.setState({
-          data: null,
+          data: data ? JSON.parse(data) : null,
           loading: false
         })
       }

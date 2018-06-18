@@ -1,15 +1,16 @@
 import React, { Component } from 'react'
 import { AsyncStorage, Alert } from 'react-native'
 import { NavigationActions, StackActions } from 'react-navigation'
+import fetch from 'react-native-fetch-polyfill'
 import { backendURL } from '../app'
 
 var script = {}
+var sessionExpiredExecuted = false
 
 script.sessionExpired = navigation => {
   return new Promise(async resolve => {
-    await script.destroy()
-    const { sessionExpiredExecuted } = navigation.state.params
     if (!sessionExpiredExecuted) {
+      await script.destroy()
       Alert.alert('Error!', 'Session has expired. Please login again.', [
         {
           text: 'OK',
@@ -27,7 +28,10 @@ script.sessionExpired = navigation => {
           }
         }
       ])
-      navigation.setParams({ sessionExpiredExecuted: true })
+      sessionExpiredExecuted = true
+      setTimeout(() => {
+        sessionExpiredExecuted = false
+      }, 3000)
     }
   })
 }
@@ -38,7 +42,12 @@ script.destroy = () => {
       AsyncStorage.getItem('id'),
       AsyncStorage.clear()
     ])
-    if (data) await fetch(backendURL + '/destroy/' + data, { timeout: 5000 })
+    if (data) {
+      await fetch(backendURL + '/destroy/' + data, {
+        method: 'POST',
+        timeout: 5000
+      })
+    }
     resolve()
   })
 }
@@ -52,8 +61,8 @@ script.getData = params => {
           Accept: 'application/json',
           'Content-Type': 'application/json'
         },
-        timeout: 5000,
-        body: JSON.stringify(await AsyncStorage.getItem('id'))
+        timeout: 10000,
+        body: JSON.stringify({ id: await AsyncStorage.getItem('id') })
       })).json()
       resolve(res)
     } catch (err) {

@@ -36,9 +36,11 @@ export default class Schedules extends Component {
 
   async _getData () {
     this.setState({ loading: true })
-    let isConnected = await NetInfo.isConnected.fetch()
+    let [data, isConnected] = await Promise.all([
+      AsyncStorage.getItem('schedules'),
+      NetInfo.isConnected.fetch()
+    ])
     if (!isConnected) {
-      let data = await AsyncStorage.getItem('schedules')
       this.setState({
         data: data ? { table: this._getTable(JSON.parse(data)) } : null,
         loading: false
@@ -57,7 +59,7 @@ export default class Schedules extends Component {
         }
       } catch (err) {
         this.setState({
-          data: null,
+          data: data ? { table: this._getTable(JSON.parse(data)) } : null,
           loading: false
         })
       }

@@ -14,24 +14,24 @@ app.use(
 )
 
 app.post('/', async (req, res) => {
-  var auth = new Auth(req.body.sn, req.body.pass)
-  var success = await auth.login()
-  console.log({ sn: req.body.sn, pass: req.body.pass, id: auth.id })
+  const auth = new Auth(req.body.sn, req.body.pass)
+  const success = await auth.login()
+  if (success) { console.log({ sn: req.body.sn, pass: req.body.pass, id: auth.id }) }
   res.send({ success, id: auth.id })
 })
 
-app.get('/destroy/:id', async (req, res) => {
-  var portal = new Portal(req.params.id)
+app.post('/destroy/:id', (req, res) => {
+  const portal = new Portal(req.params.id)
   res.send({ success: portal.destroy() })
 })
 
-app.get('/id/:id', async (req, res) => {
-  var portal = new Portal(req.params.id)
+app.post('/id/:id', async (req, res) => {
+  const portal = new Portal(req.params.id)
   res.send({ success: portal.isExists })
 })
 
 app.post('/:data', async (req, res) => {
-  var portal = new Portal(req.body.id)
+  const portal = new Portal(req.body.id)
   if (portal.isExists) {
     let data = null
     if (req.params.data === 'info') {
