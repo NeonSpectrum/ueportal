@@ -53,7 +53,7 @@ script.getData = params => {
           'Content-Type': 'application/json'
         },
         timeout: 5000,
-        body: await AsyncStorage.getItem('id')
+        body: JSON.stringify(await AsyncStorage.getItem('id'))
       })).json()
       resolve(res)
     } catch (err) {
