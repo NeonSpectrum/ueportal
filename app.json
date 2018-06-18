@@ -2,11 +2,11 @@
   "expo": {
     "name": "UE Portal",
     "description": "UE Portal for mobile",
+  "privacy": "unlisted",
     "slug": "ue-portal",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "sdkVersion": "27.0.0",
     "ios": {
-      "supportsTablet": true,
       "bundleIdentifier": "com.neonspectrum.ueportal"
     },
     "android": {
@@ -21,8 +21,20 @@
       "app/images/*"
     ],
     "updates": {
-      "fallbackToCacheTimeout": 5000
+      "checkAutomatically": "ON_ERROR_RECOVERY"
     },
+    "hooks": {
+      "postPublish": [
+        {
+          "file": "sentry-expo/upload-sourcemaps",
+          "config": {
+            "organization": "neonspectrum",
+            "project": "ueportal",
+            "authToken": "20ffeab5030e4b7d88e3ac6fc582df17a0d6b714c0eb438c9f5063e5719a468b"
+          }
+        }
+      ]
+    }
   },
-  "backendURL": "http://neonspectrum:xyz:3000"
+  "backendURL": "http://neonspectrum.xyz:3000"
 }

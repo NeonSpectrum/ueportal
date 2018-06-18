@@ -64,7 +64,7 @@ app.post('/:data', async (req, res) => {
         )
       )
     }
-    res.send(JSON.stringify({ success: true, data }, null, 2))
+    res.send({ success: true, data })
   } else {
     res.send({ success: false, data: null })
   }

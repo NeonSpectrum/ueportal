@@ -8,23 +8,27 @@ var script = {}
 script.sessionExpired = navigation => {
   return new Promise(async resolve => {
     await script.destroy()
-    Alert.alert('Error!', 'Session has expired. Please login again.', [
-      {
-        text: 'OK',
-        onPress: () => {
-          navigation.dispatch(
-            StackActions.reset({
-              index: 0,
-              actions: [
-                NavigationActions.navigate({
-                  routeName: 'Login'
-                })
-              ]
-            })
-          )
+    const { sessionExpiredExecuted } = navigation.state.params
+    if (!sessionExpiredExecuted) {
+      Alert.alert('Error!', 'Session has expired. Please login again.', [
+        {
+          text: 'OK',
+          onPress: () => {
+            navigation.dispatch(
+              StackActions.reset({
+                index: 0,
+                actions: [
+                  NavigationActions.navigate({
+                    routeName: 'Login'
+                  })
+                ]
+              })
+            )
+          }
         }
-      }
-    ])
+      ])
+      navigation.setParams({ sessionExpiredExecuted: true })
+    }
   })
 }
 
@@ -34,7 +38,7 @@ script.destroy = () => {
       AsyncStorage.getItem('id'),
       AsyncStorage.clear()
     ])
-    if (data) await fetch(backendURL + '/destroy/' + JSON.parse(data).id)
+    if (data) await fetch(backendURL + '/destroy/' + data, { timeout: 5000 })
     resolve()
   })
 }
@@ -48,6 +52,7 @@ script.getData = params => {
           Accept: 'application/json',
           'Content-Type': 'application/json'
         },
+        timeout: 5000,
         body: await AsyncStorage.getItem('id')
       })).json()
       resolve(res)

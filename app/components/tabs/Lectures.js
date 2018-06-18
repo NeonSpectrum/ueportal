@@ -85,12 +85,10 @@ export default class Lectures extends Component {
         }}
       />
     )
-    let bodyData = body.map((headerContentData, index) => {
-      let x = (
+    let bodyData =
+      body[0][0].indexOf('No Lectures') > -1 ? (
         <Row
-          key={index}
-          data={headerContentData.slice(0, headerContentData.length - 1)}
-          flexArr={[1, 0.5, 0.5, 1.2, 1, 2]}
+          data={[body[0][0]]}
           textStyle={{
             textAlign: 'center',
             padding: 2
@@ -100,46 +98,63 @@ export default class Lectures extends Component {
             minHeight: 40
           }}
         />
-      )
-      let y = headerContentData[headerContentData.length - 1].map(
-        (tableData, tableIndex) => {
-          let { link } = tableData
-          tableData.link = (
-            <Text
-              style={{
-                color: 'blue',
-                textAlign: 'center',
-                padding: 2
-              }}
-              onPress={() => Linking.openURL(link)}
-            >
-              Download
-            </Text>
-          )
-          return (
+      ) : (
+        body.map((headerContentData, index) => {
+          let x = (
             <Row
-              key={tableIndex}
-              data={Object.values(tableData)}
-              flexArr={[1, 2, 1]}
+              key={index}
+              data={headerContentData.slice(0, headerContentData.length - 1)}
+              flexArr={[1, 0.5, 0.5, 1.2, 1, 2]}
               textStyle={{
                 textAlign: 'center',
                 padding: 2
               }}
               style={{
-                backgroundColor: tableIndex % 2 ? '#f4f4f4' : '#fff',
+                backgroundColor: '#F7F6E7',
                 minHeight: 40
               }}
             />
           )
-        }
+          let y = headerContentData[headerContentData.length - 1].map(
+            (tableData, tableIndex) => {
+              let { link } = tableData
+              tableData.link = (
+                <Text
+                  style={{
+                    color: 'blue',
+                    textAlign: 'center',
+                    padding: 2
+                  }}
+                  onPress={() => Linking.openURL(link)}
+                >
+                  Download
+                </Text>
+              )
+              return (
+                <Row
+                  key={tableIndex}
+                  data={Object.values(tableData)}
+                  flexArr={[1, 2, 1]}
+                  textStyle={{
+                    textAlign: 'center',
+                    padding: 2
+                  }}
+                  style={{
+                    backgroundColor: tableIndex % 2 ? '#f4f4f4' : '#fff',
+                    minHeight: 40
+                  }}
+                />
+              )
+            }
+          )
+          return (
+            <TableWrapper key={index}>
+              {x}
+              {y}
+            </TableWrapper>
+          )
+        })
       )
-      return (
-        <TableWrapper key={index}>
-          {x}
-          {y}
-        </TableWrapper>
-      )
-    })
     return (
       <TableWrapper>
         {headerData}

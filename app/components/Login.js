@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import Expo from 'expo'
 import {
   StyleSheet,
   Text,
@@ -12,8 +13,9 @@ import {
   NetInfo
 } from 'react-native'
 import { NavigationActions, StackActions } from 'react-navigation'
+import { MessageBarManager } from 'react-native-message-bar'
 import Spinner from 'react-native-loading-spinner-overlay'
-import { backendURL } from '../../app'
+import { backendURL, expo } from '../../app'
 import script from '../script'
 
 export default class Login extends Component {
@@ -28,14 +30,15 @@ export default class Login extends Component {
   }
 
   async componentDidMount () {
-    var [value, isConnected] = await Promise.all([
+    let [data, isConnected] = await Promise.all([
       AsyncStorage.getItem('id'),
       NetInfo.isConnected.fetch()
     ])
-    if (value) {
+    if (data) {
       if (isConnected) {
+        this._checkForUpdates()
         try {
-          let json = await script.getData('id/' + JSON.parse(value).id)
+          let json = await script.getData('id/' + data)
           if (!json.success) return this.setState({ show: true })
         } catch (err) {
           // ignore no connection
@@ -67,12 +70,63 @@ export default class Login extends Component {
     )
   }
 
+  _checkForUpdates () {
+    Expo.Updates.checkForUpdateAsync()
+      .then(isAvailable => {
+        if (isAvailable) {
+          Alert.alert('New Update', 'An update is available. Download now?', [
+            {
+              text: 'Download',
+              onPress: () => {
+                Expo.Updates.fetchUpdateAsync({
+                  eventListener: event => {
+                    if (
+                      event.type === Expo.Updates.EventType.DOWNLOAD_STARTED
+                    ) {
+                      MessageBarManager.showAlert({
+                        message: 'Downloading...',
+                        shouldHideAfterDelay: false
+                      })
+                    } else if (
+                      event.type === Expo.Updates.EventType.DOWNLOAD_FINISHED
+                    ) {
+                      MessageBarManager.hideAlert()
+                      Alert.alert(
+                        'Restart',
+                        'Done installing the update. Restart now?',
+                        [
+                          {
+                            text: 'Restart',
+                            onPress: () => {
+                              Expo.Updates.reloadFromCache()
+                            }
+                          },
+                          {
+                            text: 'Cancel',
+                            style: 'cancel'
+                          }
+                        ]
+                      )
+                    }
+                  }
+                })
+              }
+            },
+            {
+              text: 'Cancel',
+              style: 'cancel'
+            }
+          ])
+        }
+      })
+      .catch(() => {})
+  }
+
   async _login () {
+    let { sn, pass } = this.state
+    if (!sn || !pass) return Alert.alert('Error!', 'Please fill up all fields.')
     this.setState({ logging: true })
-    let credentials = JSON.stringify({
-      sn: this.state.sn,
-      pass: this.state.pass
-    })
+    let credentials = JSON.stringify({ sn, pass })
     try {
       let res = await (await fetch(backendURL + '/', {
         method: 'POST',
@@ -83,7 +137,7 @@ export default class Login extends Component {
         body: credentials
       })).json()
       if (res.success) {
-        await AsyncStorage.setItem('id', JSON.stringify({ id: res.id }))
+        await AsyncStorage.setItem('id', res.id)
         this._clearFields()
         this.setState({ logging: false }, () => {
           this._goToMain()
@@ -96,7 +150,7 @@ export default class Login extends Component {
         )
       }
     } catch (err) {
-      Alert.alert('Error!', "Couldn't connect to server." + err, [
+      Alert.alert('Error!', "Couldn't connect to server.", [
         {
           text: 'Retry',
           onPress: () => this._login()
@@ -111,8 +165,13 @@ export default class Login extends Component {
   }
 
   render () {
+    let channel
+    if (!Expo.Constants.manifest.releaseChannel) channel = 'Dev'
+    else if (Expo.Constants.manifest.releaseChannel == 'beta') channel = 'Beta'
+    else channel = 'Official'
+
     return this.state.show ? (
-      <View style={styles.container}>
+      <KeyboardAvoidingView style={styles.container} behavior='padding'>
         <Spinner
           visible={this.state.logging}
           overlayColor='rgb(217,30,24)'
@@ -129,7 +188,12 @@ export default class Login extends Component {
           placeholder='Student Number'
           onChangeText={sn => this.setState({ sn })}
           underlineColorAndroid='transparent'
-          onSubmitEditing={() => this._login()}
+          keyboardType='numeric'
+          maxLength={11}
+          returnKeyType='next'
+          selectTextOnFocus
+          clearButtonMode='while-editing'
+          onSubmitEditing={() => this.passInput.focus()}
         />
         <TextInput
           ref={input => {
@@ -139,8 +203,10 @@ export default class Login extends Component {
           placeholder='Access Code'
           onChangeText={pass => this.setState({ pass })}
           underlineColorAndroid='transparent'
-          onSubmitEditing={() => this._login()}
+          selectTextOnFocus
+          clearButtonMode='while-editing'
           secureTextEntry
+          onSubmitEditing={() => this._login()}
         />
         <TouchableOpacity
           style={styles.button}
@@ -149,7 +215,17 @@ export default class Login extends Component {
         >
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
-      </View>
+        <Text
+          style={{
+            position: 'absolute',
+            bottom: 5,
+            textAlign: 'center',
+            color: '#fff'
+          }}
+        >
+          {channel} Build v{expo.version}
+        </Text>
+      </KeyboardAvoidingView>
     ) : (
       <Spinner
         visible={true}
@@ -182,7 +258,8 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 20,
     backgroundColor: '#fff',
-    fontSize: 18
+    fontSize: 18,
+    textAlign: 'center'
   },
   button: {
     alignSelf: 'stretch',

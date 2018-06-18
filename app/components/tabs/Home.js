@@ -58,34 +58,38 @@ export default class Home extends Component {
       return (
         <PTRView
           onRefresh={() => this._getData()}
-          contentContainerStyle={styles.container}
+          contentContainerStyle={{ flex: 1 }}
         >
-          <Image source={require('../../images/loading.gif')} />
+          <View style={styles.container}>
+            <Image source={require('../../images/loading.gif')} />
+          </View>
         </PTRView>
       )
     } else if (!data) {
       return (
         <PTRView
           onRefresh={() => this._getData()}
-          contentContainerStyle={styles.container}
+          contentContainerStyle={{ flex: 1 }}
         >
-          <Image
-            source={require('../../images/error.png')}
-            style={styles.logo}
-          />
-          <Text style={{ fontSize: 36, textAlign: 'center' }}>
-            Couldn't connect to server.
-          </Text>
+          <View style={styles.container}>
+            <Image
+              source={require('../../images/error.png')}
+              style={styles.logo}
+            />
+            <Text style={{ fontSize: 36, textAlign: 'center' }}>
+              Couldn't connect to server.
+            </Text>
+          </View>
         </PTRView>
       )
     } else {
       let { url, logo, no, name, course, yearLevel, college, campus } = data
       return (
-        <ScrollView>
-          <PTRView
-            onRefresh={() => this._getData()}
-            contentContainerStyle={styles.container}
-          >
+        <PTRView
+          onRefresh={() => this._getData()}
+          contentContainerStyle={{ flex: 1 }}
+        >
+          <ScrollView contentContainerStyle={styles.container}>
             <Image source={{ uri: url }} style={styles.logo} />
             <Text style={styles.no}>{no}</Text>
             <Text style={styles.info}>
@@ -95,8 +99,8 @@ export default class Home extends Component {
               <Text style={styles.bold}>College</Text>:{` ${college}\n\n`}
               <Text style={styles.bold}>Campus</Text>:{` ${campus}`}
             </Text>
-          </PTRView>
-        </ScrollView>
+          </ScrollView>
+        </PTRView>
       )
     }
   }
