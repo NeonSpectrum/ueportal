@@ -70,6 +70,10 @@ export default class Login extends Component {
   }
 
   async _checkForUpdates () {
+    messageBarAlert({
+      message: 'Checking for updates...',
+      shouldHideAfterDelay: false
+    })
     Expo.Updates.checkForUpdateAsync()
       .then(update => {
         if (update.isAvailable) {
@@ -82,10 +86,9 @@ export default class Login extends Component {
                     if (
                       event.type === Expo.Updates.EventType.DOWNLOAD_STARTED
                     ) {
-                      MessageBarManager.showAlert({
+                      messageBarAlert({
                         message: 'Downloading...',
-                        shouldHideAfterDelay: false,
-                        viewTopOffset: Expo.Constants.statusBarHeight
+                        shouldHideAfterDelay: false
                       })
                     } else if (
                       event.type === Expo.Updates.EventType.DOWNLOAD_FINISHED
@@ -117,9 +120,28 @@ export default class Login extends Component {
               style: 'cancel'
             }
           ])
+        } else {
+          messageBarAlert({
+            message: 'You are on the latest version.',
+            alertType: 'success'
+          })
         }
       })
-      .catch(() => {})
+      .catch(() => {
+        messageBarAlert({
+          message: 'There was an error checking for updates.',
+          alertType: 'error'
+        })
+      })
+
+    function messageBarAlert (params) {
+      MessageBarManager.showAlert({
+        shouldHideOnTap: false,
+        messageStyle: { color: 'white', fontSize: 12, textAlign: 'center' },
+        viewTopOffset: Expo.Constants.statusBarHeight,
+        ...params
+      })
+    }
   }
 
   async _login () {
