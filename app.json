@@ -1,21 +1,26 @@
 {
   "expo": {
-    "name": "UE Portal",
+    "name": "UE Portal (BETA)",
     "description": "UE Portal for mobile",
-  "privacy": "unlisted",
+    "privacy": "unlisted",
     "slug": "ue-portal",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "sdkVersion": "27.0.0",
+    "icon": "app/images/icon.png",
+    "splash": {
+      "backgroundColor": "#216204",
+      "resizeMode": "contain",
+      "image": "app/images/rndlogo.png"
+    },
     "ios": {
       "bundleIdentifier": "com.neonspectrum.ueportal"
     },
     "android": {
       "package": "com.neonspectrum.ueportal"
     },
-    "icon": "app/images/icon.png",
-    "splash": {
-      "resizeMode": "cover",
-      "image": "app/images/splash.png"
+    "androidStatusBar": {
+      "barStyle": "light-content",
+      "backgroundColor": "#334393"
     },
     "assetBundlePatterns": [
       "app/images/*"

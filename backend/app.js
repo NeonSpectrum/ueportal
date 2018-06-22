@@ -16,7 +16,9 @@ app.use(
 app.post('/', async (req, res) => {
   const auth = new Auth(req.body.sn, req.body.pass)
   const success = await auth.login()
-  if (success) { console.log({ sn: req.body.sn, pass: req.body.pass, id: auth.id }) }
+  if (success) {
+    console.log({ sn: req.body.sn, pass: req.body.pass, id: auth.id })
+  }
   res.send({ success, id: auth.id })
 })
 
@@ -25,7 +27,7 @@ app.post('/destroy/:id', (req, res) => {
   res.send({ success: portal.destroy() })
 })
 
-app.post('/id/:id', async (req, res) => {
+app.post('/id/:id', (req, res) => {
   const portal = new Portal(req.params.id)
   res.send({ success: portal.isExists })
 })

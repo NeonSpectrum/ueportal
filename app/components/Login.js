@@ -9,15 +9,13 @@ import {
   TouchableOpacity,
   AsyncStorage,
   Alert,
-  Image,
-  NetInfo
+  Image
 } from 'react-native'
 import { NavigationActions, StackActions } from 'react-navigation'
 import { MessageBarManager } from 'react-native-message-bar'
 import fetch from 'react-native-fetch-polyfill'
 import Spinner from 'react-native-loading-spinner-overlay'
 import { backendURL, expo } from '../../app'
-import script from '../script'
 
 export default class Login extends Component {
   constructor (props) {
@@ -31,21 +29,7 @@ export default class Login extends Component {
   }
 
   async componentDidMount () {
-    let [data, isConnected] = await Promise.all([
-      AsyncStorage.getItem('id'),
-      NetInfo.isConnected.fetch()
-    ])
-    if (isConnected) {
-      this._checkForUpdates()
-      if (data) {
-        try {
-          let json = await script.getData('id/' + data)
-          if (!json.success) return this.setState({ show: true })
-        } catch (err) {
-          // ignore no connection
-        }
-      }
-    }
+    let data = await AsyncStorage.getItem('id')
     this.setState({ show: true }, () => {
       if (data) this._goToMain()
     })
@@ -67,81 +51,6 @@ export default class Login extends Component {
         ]
       })
     )
-  }
-
-  async _checkForUpdates () {
-    messageBarAlert({
-      message: 'Checking for updates...',
-      shouldHideAfterDelay: false
-    })
-    Expo.Updates.checkForUpdateAsync()
-      .then(update => {
-        if (update.isAvailable) {
-          Alert.alert('New Update', 'An update is available. Download now?', [
-            {
-              text: 'Download',
-              onPress: () => {
-                Expo.Updates.fetchUpdateAsync({
-                  eventListener: event => {
-                    if (
-                      event.type === Expo.Updates.EventType.DOWNLOAD_STARTED
-                    ) {
-                      messageBarAlert({
-                        message: 'Downloading...',
-                        shouldHideAfterDelay: false
-                      })
-                    } else if (
-                      event.type === Expo.Updates.EventType.DOWNLOAD_FINISHED
-                    ) {
-                      MessageBarManager.hideAlert()
-                      Alert.alert(
-                        'Restart',
-                        'Done installing the update. Restart now?',
-                        [
-                          {
-                            text: 'Restart',
-                            onPress: () => {
-                              Expo.Updates.reloadFromCache()
-                            }
-                          },
-                          {
-                            text: 'Cancel',
-                            style: 'cancel'
-                          }
-                        ]
-                      )
-                    }
-                  }
-                })
-              }
-            },
-            {
-              text: 'Cancel',
-              style: 'cancel'
-            }
-          ])
-        } else {
-          messageBarAlert({
-            message: 'You are on the latest version.',
-            alertType: 'success'
-          })
-        }
-      })
-      .catch(() => {
-        messageBarAlert({
-          message: 'There was an error checking for updates.',
-          alertType: 'error'
-        })
-      })
-
-    function messageBarAlert (params) {
-      MessageBarManager.showAlert({
-        shouldHideOnTap: false,
-        messageStyle: { color: 'white', fontSize: 12, textAlign: 'center' },
-        viewTopOffset: Expo.Constants.statusBarHeight,
-        ...params
-      })
-    }
   }
 
   async _login () {

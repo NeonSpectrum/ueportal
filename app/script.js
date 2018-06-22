@@ -11,23 +11,28 @@ script.sessionExpired = navigation => {
   return new Promise(async resolve => {
     if (!sessionExpiredExecuted) {
       await script.destroy()
-      Alert.alert('Error!', 'Session has expired. Please login again.', [
-        {
-          text: 'OK',
-          onPress: () => {
-            navigation.dispatch(
-              StackActions.reset({
-                index: 0,
-                actions: [
-                  NavigationActions.navigate({
-                    routeName: 'Login'
-                  })
-                ]
-              })
-            )
+      Alert.alert(
+        'Error!',
+        'Session has expired. Please login again.',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.dispatch(
+                StackActions.reset({
+                  index: 0,
+                  actions: [
+                    NavigationActions.navigate({
+                      routeName: 'Login'
+                    })
+                  ]
+                })
+              )
+            }
           }
-        }
-      ])
+        ],
+        { cancelable: false }
+      )
       sessionExpiredExecuted = true
       setTimeout(() => {
         sessionExpiredExecuted = false

@@ -194,11 +194,7 @@ export default class Lectures extends Component {
     } else {
       return (
         <PTRView onRefresh={() => this._getData()}>
-          <ScrollView
-            contentContainerStyle={{
-              marginTop: Expo.Constants.statusBarHeight
-            }}
-          >
+          <ScrollView>
             <Table borderStyle={{ borderColor: '#C1C0B9' }}>{data.table}</Table>
           </ScrollView>
         </PTRView>
@@ -212,8 +208,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 40,
-    marginTop: Expo.Constants.statusBarHeight
+    padding: 40
   },
   logo: {
     width: 200,

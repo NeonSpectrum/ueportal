@@ -1,6 +1,6 @@
 {
   "name": "UEPortal",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "devDependencies": {
     "react-native-scripts": "1.14.0",
     "jest-expo": "~27.0.0",
